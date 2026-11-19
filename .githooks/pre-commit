@@ -1,0 +1,13 @@
+#!/bin/sh
+# Reject commits when any staged text file contains TODO or FIXME.
+set -eu
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -n "$files" ] || exit 0
+for file in $files; do
+  [ -f "$file" ] || continue
+  if git diff --cached -- "$file" | grep -E '^[+].*(TODO|FIXME)' >/dev/null; then
+    echo "Commit blocked: staged change contains TODO or FIXME in $file" >&2
+    exit 1
+  fi
+done
+exit 0
